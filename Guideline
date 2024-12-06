@@ -1,0 +1,17 @@
+Libs: Pygame, Tkinter python-chess
+GUI: 2D display, Drag and drop or click to move, animated piece movement and for capture, movement for each piece
+Modules:
+    Timer
+    pieceMovement
+    Undo
+    Redo
+    Match History(can be done using json?)
+    Basic AI(if we have time can be turned into an advanced one)
+    Check, Checkmate and stalemate detection
+    pieceTracker(i.e how many pieces are on the board currently)
+    Hints(optional)
+    Board
+    Endgame evaluation(optional)
+    moveValidation
+
+Design: Modular
