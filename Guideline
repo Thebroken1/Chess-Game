@@ -5,12 +5,12 @@ Modules:
     pieceMovement
     Undo
     Redo
-    Match History(can be done using json?)
-    Basic AI(if we have time can be turned into an advanced one)
+    Match History(can be done using json?) 
+    Basic AI(if we have time can be turned into an advanced one) F
     Check, Checkmate and stalemate detection
     pieceTracker(i.e how many pieces are on the board currently)
     Hints(optional)
-    Board
+    Board V
     Endgame evaluation(optional)
     moveValidation
 
