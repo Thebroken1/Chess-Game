@@ -1,5 +1,6 @@
 import pygame
 import chess
+import chess.engine  # Import the chess engine module
 
 # Initialize Pygame
 pygame.init()
@@ -16,6 +17,7 @@ LIGHT_SQUARE = (240, 217, 181)
 DARK_SQUARE = (181, 136, 99)
 HIGHLIGHT_COLOR = (255, 255, 0, 153)  # Yellow with 60% transparency
 CHECK_COLOR = (255, 0, 0, 153)  # Red with 60% transparency
+CHECKMATE_COLOR = (255, 0, 0)  # Red for checkmate text
 
 # Load the images for the pieces (ensure your images are named accordingly)
 pieces = {}
@@ -48,6 +50,12 @@ def draw_board(board, selected_square=None, check_squares=None):
                 piece_code = piece.piece_type - 1 + (0 if piece.color == chess.WHITE else 6)
                 screen.blit(pieces[piece_images[piece_code]], (col * 100 + 10, row * 100 + 10))
 
+def draw_checkmate_message():
+    font = pygame.font.Font(None, 74)
+    text = font.render("Checkmate!", True, CHECKMATE_COLOR)
+    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    screen.blit(text, text_rect)
+
 # Handle mouse events for piece movement
 def get_square_under_mouse():
     pos = pygame.mouse.get_pos()
@@ -57,13 +65,18 @@ def main():
     board = chess.Board()
     selected_square = None
     check_squares = []
+    game_over = False
+
+    # Initialize Stockfish
+    stockfish_path = "C:/Users/RVAISH/Desktop/New folder/New folder/stockfish-windows-x86-64-avx2.exe"  # Update this path
+    engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
 
     running = True
     while running:
         screen.fill(WHITE)
 
         # Draw the chessboard and pieces
-        draw_board(board, selected_square, check_squares)
+        draw_board(board , selected_square, check_squares)
 
         # Check for check
         if board.is_check():
@@ -74,10 +87,14 @@ def main():
             else:
                 check_squares = []  # Clear the highlight
 
+        # Check for checkmate
+        if board.is_checkmate():
+            game_over = True
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and not game_over:
                 row, col = get_square_under_mouse()
                 square = chess.square(col, row)
                 piece = board.piece_at(square)
@@ -89,11 +106,21 @@ def main():
                     if move in board.legal_moves:
                         board.push(move)  # Push the move to the board
                         selected_square = None  # Deselect the piece
+
+                        # AI makes a move
+                        if not board.is_game_over():
+                            result = engine.play(board, chess.engine.Limit(time=2.0))  # AI thinks for 2 seconds
+                            board.push(result.move)  # Push the AI's move
+
                     else:
                         selected_square = None  # Invalid move, deselect
 
+        if game_over:
+            draw_checkmate_message()
+
         pygame.display.flip()
 
+    engine.quit()  # Close the engine when done
     pygame.quit()
 
 if __name__ == "__main__":
