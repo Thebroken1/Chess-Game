@@ -1,0 +1,102 @@
+class Board:
+    def __init__(self):
+        self.squares = [[0, 0, 0, 0, 0, 0, 0, 0] for col in range(COLS)]
+        self.last_move = None
+        self.move_history = []  # Store the move history
+        self._create()
+        self._add_pieces('white')
+        self._add_pieces('black')
+
+    def move(self, piece, move, testing=False):
+        initial = move.initial
+        final = move.final
+
+        move_str = f"{piece.__class__.__name__} moves from {Square.get_alphacol(initial.col)}{8-initial.row} to {Square.get_alphacol(final.col)}{8-final.row}"
+        self.move_history.append(move_str)
+def show_bg(self, surface):
+    theme = self.config.theme
+    
+    # Show the main chessboard
+    for row in range(ROWS):
+        for col in range(COLS):
+            # color
+            color = theme.bg.light if (row + col) % 2 == 0 else theme.bg.dark
+            # rect
+            rect = (col * SQSIZE, row * SQSIZE, SQSIZE, SQSIZE)
+            # blit
+            pygame.draw.rect(surface, color, rect)
+
+            # Row coordinates
+            if col == 0:
+                color = theme.bg.dark if row % 2 == 0 else theme.bg.light
+                lbl = self.config.font.render(str(ROWS-row), 1, color)
+                lbl_pos = (5, 5 + row * SQSIZE)
+                surface.blit(lbl, lbl_pos)
+
+            # Col coordinates
+            if row == 7:
+                color = theme.bg.dark if (row + col) % 2 == 0 else theme.bg.light
+                lbl = self.config.font.render(Square.get_alphacol(col), 1, color)
+                lbl_pos = (col * SQSIZE + SQSIZE - 20, HEIGHT - 20)
+                surface.blit(lbl, lbl_pos)
+    
+    # Draw the move history bar on the right side of the board
+    self.show_move_history(surface)
+
+
+def show_move_history(self, surface):
+    bar_x = COLS * SQSIZE
+    bar_width = 200
+    bar_height = HEIGHT
+    pygame.draw.rect(surface, (50, 50, 50), (bar_x, 0, bar_width, bar_height))  
+
+    font = self.config.font
+    history_y = 20  
+    for move in self.board.move_history[-5:]: 
+        move_text = font.render(move, True, (255, 255, 255))  
+        surface.blit(move_text, (bar_x + 10, history_y))
+        history_y += 30  
+
+class Main:
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        pygame.display.set_caption('Chess')
+        self.game = Game()
+
+    def mainloop(self):
+        screen = self.screen
+        game = self.game
+        board = self.game.board
+        dragger = self.game.dragger
+
+        while True:
+            # Show background (including move history bar)
+            game.show_bg(screen)
+            game.show_last_move(screen)
+            game.show_moves(screen)
+            game.show_pieces(screen)
+            game.show_hover(screen)
+
+            if dragger.dragging:
+                dragger.update_blit(screen)
+
+            for event in pygame.event.get():
+               if event.type == pygame.MOUSEBUTTONUP:
+                    if dragger.dragging:
+                        dragger.update_mouse(event.pos)
+                        released_row = dragger.mouseY // SQSIZE
+                        released_col = dragger.mouseX // SQSIZE
+
+                        initial = Square(dragger.initial_row, dragger.initial_col)
+                        final = Square(released_row, released_col)
+                        move = Move(initial, final)
+
+                        if board.valid_move(dragger.piece, move):
+                            captured = board.squares[released_row][released_col].has_piece()
+                            board.move(dragger.piece, move)  # This will update the move history
+                            game.next_turn()
+
+                    dragger.undrag_piece()
+
+            pygame.display.update()
